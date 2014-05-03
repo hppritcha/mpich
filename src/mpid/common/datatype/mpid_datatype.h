@@ -587,7 +587,7 @@ int MPID_Type_vector(int count,
 		     MPI_Datatype oldtype,
 		     MPI_Datatype *newtype);
 
-int MPID_Type_contiguous(int count,
+int MPID_Type_contiguous(MPI_Aint count,
 			 MPI_Datatype oldtype,
 			 MPI_Datatype *newtype);
 

@@ -24,7 +24,7 @@ Output Parameters:
   Return Value:
   MPI_SUCCESS on success, MPI error code on failure.
 @*/
-int MPID_Type_contiguous(int count,
+int MPID_Type_contiguous(MPI_Aint count,
 			 MPI_Datatype oldtype,
 			 MPI_Datatype *newtype)
 {
