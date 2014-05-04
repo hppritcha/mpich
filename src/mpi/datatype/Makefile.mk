@@ -30,6 +30,7 @@ mpi_sources +=                                   \
     src/mpi/datatype/type_hindexed.c             \
     src/mpi/datatype/type_struct.c               \
     src/mpi/datatype/type_contiguous.c           \
+    src/mpi/datatype/type_contiguous_x.c         \
     src/mpi/datatype/type_free.c                 \
     src/mpi/datatype/type_hvector.c              \
     src/mpi/datatype/type_dup.c                  \
