@@ -611,6 +611,8 @@ EXPORTS
 	MPI_Type_commit=PMPI_Type_commit
 	PMPI_Type_contiguous
 	MPI_Type_contiguous=PMPI_Type_contiguous
+	PMPIX_Type_contiguous_x
+	MPIX_Type_contiguous_x=PMPIX_Type_contiguous_x
 	PMPI_Type_create_darray
 	MPI_Type_create_darray=PMPI_Type_create_darray
 ;	PMPI_Type_create_f90_complex

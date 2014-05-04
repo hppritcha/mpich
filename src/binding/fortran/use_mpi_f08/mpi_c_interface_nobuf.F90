@@ -228,6 +228,17 @@ function MPIR_Type_contiguous_c(count, oldtype, newtype) &
     integer(c_int) :: ierror
 end function MPIR_Type_contiguous_c
 
+function MPIR_Type_contiguous_x_c(count, oldtype, newtype) &
+    bind(C, name="PMPIX_Type_contiguous_x") result(ierror)
+    use, intrinsic :: iso_c_binding, only : c_int
+    use :: mpi_c_interface_types, only : c_Datatype
+    implicit none
+    integer(MPI_COUNT_KIND), intent(in) :: count
+    integer(c_Datatype), value, intent(in) :: oldtype
+    integer(c_Datatype), intent(out) :: newtype
+    integer(c_int) :: ierror
+end function MPIR_Type_contiguous_x_c
+
 function MPIR_Type_create_darray_c(size, rank, ndims, array_of_gsizes, &
            array_of_distribs, array_of_dargs, array_of_psizes, order, oldtype, newtype) &
     bind(C, name="PMPI_Type_create_darray") result(ierror)

@@ -8,11 +8,11 @@
 
 /* -- Begin Profiling Symbol Block for routine MPI_Type_contigous */
 #if defined(HAVE_PRAGMA_WEAK)
-#pragma weak MPI_Type_contiguous = PMPI_Type_contiguous
+#pragma weak MPI_Type_contiguous_x = PMPI_Type_contiguous_x
 #elif defined(HAVE_PRAGMA_HP_SEC_DEF)
-#pragma _HP_SECONDARY_DEF PMPI_Type_contiguous  MPI_Type_contiguous
+#pragma _HP_SECONDARY_DEF PMPI_Type_contiguous_x  MPI_Type_contiguous_x
 #elif defined(HAVE_PRAGMA_CRI_DUP)
-#pragma _CRI duplicate MPI_Type_contiguous as PMPI_Type_contiguous
+#pragma _CRI duplicate MPI_Type_contiguous_x as PMPI_Type_contiguous_x
 #endif
 /* -- End Profiling Symbol Block */
 
@@ -20,8 +20,8 @@
    the MPI routines.  You can use USE_WEAK_SYMBOLS to see if MPICH is
    using weak symbols to implement the MPI routines. */
 #ifndef MPICH_MPI_FROM_PMPI
-#undef MPI_Type_contiguous
-#define MPI_Type_contiguous PMPI_Type_contiguous
+#undef MPI_Type_contiguous_x
+#define MPI_Type_contiguous_x PMPI_Type_contiguous_x
 
 #undef FUNCNAME
 #define FUNCNAME MPIR_Type_contiguous_impl
@@ -35,9 +35,9 @@ int MPIR_Type_contiguous_x_impl(MPI_Aint count,
     MPID_Datatype *new_dtp;
     MPI_Datatype new_handle;
     
-    mpi_errno = MPID_Type_contiguous_x(count,
-				       oldtype,
-				       &new_handle);
+    mpi_errno = MPID_Type_contiguous(count,
+				     oldtype,
+				     &new_handle);
 
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
@@ -66,11 +66,11 @@ int MPIR_Type_contiguous_x_impl(MPI_Aint count,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPI_Type_contiguous
+#define FUNCNAME MPI_Type_contiguous_x
 #undef FCNAME
 #define FCNAME MPIU_QUOTE(FUNCNAME)
 /*@
-    MPI_Type_contiguous - Creates a contiguous datatype
+    MPI_Type_contiguous_x - Creates a contiguous datatype
 
 Input Parameters:
 + count - replication count (nonnegative integer) 

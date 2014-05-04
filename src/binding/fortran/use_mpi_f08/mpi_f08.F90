@@ -550,6 +550,17 @@ interface MPI_Type_contiguous
     end subroutine MPI_Type_contiguous_f08
 end interface MPI_Type_contiguous
 
+interface MPIX_Type_contiguous_x
+    subroutine MPIX_Type_contiguous_x_f08(count, oldtype, newtype, ierror)
+        use :: mpi_f08_types, only : MPI_Datatype
+        implicit none
+        integer(MPI_COUNT_KIND), intent(in) :: count
+        type(MPI_Datatype), intent(in) :: oldtype
+        type(MPI_Datatype), intent(out) :: newtype
+        integer, optional, intent(out) :: ierror
+    end subroutine MPI_Type_contiguous_x_f08
+end interface MPI_Type_contiguous_x
+
 interface MPI_Type_create_darray
     subroutine MPI_Type_create_darray_f08(size, rank, ndims, array_of_gsizes, &
                    array_of_distribs, array_of_dargs, array_of_psizes, order, &
