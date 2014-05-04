@@ -959,6 +959,8 @@ is too big (> MPIU_SHMW_GHND_SZ)
 **mpi_sendrecv_replace %p %d %D %i %t %i %t %C %p:MPI_Sendrecv_replace(buf=%p, count=%d, %D, dest=%i, stag=%t, src=%i, rtag=%t, %C, status=%p) failed
 **mpi_type_contiguous:MPI_Type_continuous failed
 **mpi_type_contiguous %d %D %p:MPI_Type_contiguous(count=%d, %D, new_type_p=%p) failed
+**mpix_type_contiguous_x:MPIX_Type_continuous_x failed
+**mpix_type_contiguous_x %d %D %p:MPIX_Type_contiguous_x(count=%zu, %D, new_type_p=%p) failed
 **mpi_type_vector:MPI_Type_vector failed
 **mpi_type_vector %d %d %d %D %p:MPI_Type_vector(count=%d, blocklength=%d, stride=%d, %D, new_type_p=%p) failed
 **mpi_type_hvector:MPI_Type_hvector failed

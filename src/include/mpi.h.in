@@ -1486,6 +1486,8 @@ int MPIX_Comm_group_failed(MPI_Comm comm, MPI_Group *failed_group) MPICH_ATTR_WE
 int MPIX_Comm_remote_group_failed(MPI_Comm comm, MPI_Group *failed_group) MPICH_ATTR_WEAK_ALIAS("PMPIX_Comm_remote_group_failed");
 int MPIX_Comm_reenable_anysource(MPI_Comm comm, MPI_Group *failed_group) MPICH_ATTR_WEAK_ALIAS("PMPIX_Comm_reenable_anysource");
 
+/* Large-count Extensions */
+int MPIX_Type_contiguous_x(MPI_Count count, MPI_Datatype oldtype, MPI_Datatype *newtype) MPICH_ATTR_WEAK_ALIAS("PMPIX_Type_contiguous_x");
 
 /* MPI_T interface */
 /* The MPI_T routines are available only in C bindings - tell tools that they
