@@ -1269,7 +1269,11 @@ int MPIDI_Win_fence(int assert, MPID_Win *win_ptr)
 	   RMA ops on its window */  
             
 	/* first initialize the completion counter. */
+#ifdef RMA_SYNC_OPA_COUNTER
+        OPA_store_int(&(win_ptr->my_counter), comm_size);
+#else
 	win_ptr->my_counter = comm_size;
+#endif
             
 	mpi_errno = MPIR_Reduce_scatter_block_impl(MPI_IN_PLACE, rma_target_proc, 1,
                                                    MPI_INT, MPI_SUM, comm_ptr, &errflag);
@@ -1284,10 +1288,11 @@ int MPIDI_Win_fence(int assert, MPID_Win *win_ptr)
         }
 
 	/* Set the completion counter */
-	/* FIXME: MT: this needs to be done atomically because other
-	   procs have the address and could decrement it. */
-	win_ptr->my_counter = win_ptr->my_counter - comm_size + 
-	    rma_target_proc[0];  
+#ifdef RMA_SYNC_OPA_COUNTER
+        OPA_add_int(&(win_ptr->my_counter), - comm_size + rma_target_proc[0]);
+#else
+        win_ptr->my_counter = win_ptr->my_counter - comm_size + rma_target_proc[0];
+#endif
 
     MPIR_T_PVAR_TIMER_START(RMA, rma_winfence_issue);
     MPIR_T_PVAR_COUNTER_INC(RMA, rma_winfence_issue_aux, total_op_count);
@@ -1380,11 +1385,19 @@ int MPIDI_Win_fence(int assert, MPID_Win *win_ptr)
 	
  finish_up:
 	/* wait for all operations from other processes to finish */
+#ifdef RMA_SYNC_OPA_COUNTER
+	if (OPA_load_int(&(win_ptr->my_counter)))
+#else
 	if (win_ptr->my_counter)
+#endif
 	{
 	    MPIR_T_PVAR_TIMER_START(RMA, rma_winfence_wait);
 	    MPID_Progress_start(&progress_state);
+#ifdef RMA_SYNC_OPA_COUNTER
+            while (OPA_load_int(&(win_ptr->my_counter)))
+#else
 	    while (win_ptr->my_counter)
+#endif
 	    {
 		mpi_errno = MPID_Progress_wait(&progress_state);
 		/* --BEGIN ERROR HANDLING-- */
@@ -2292,7 +2305,11 @@ int MPIDI_Win_post(MPID_Group *post_grp_ptr, int assert, MPID_Win *win_ptr)
     }
         
     /* initialize the completion counter */
+#ifdef RMA_SYNC_OPA_COUNTER
+    OPA_store_int(&(win_ptr->my_counter), post_grp_size);
+#else
     win_ptr->my_counter = post_grp_size;
+#endif
         
     if ((assert & MPI_MODE_NOCHECK) == 0)
     {
@@ -2736,7 +2753,11 @@ int MPIDI_Win_complete(MPID_Win *win_ptr)
 	dst = ranks_in_win_grp[i];
 	if (dst == rank) {
 	    /* FIXME: MT: this has to be done atomically */
+#ifdef RMA_SYNC_OPA_COUNTER
+            OPA_decr_int(&(win_ptr->my_counter));
+#else
 	    win_ptr->my_counter -= 1;
+#endif
 	}
 	else if (nops_to_proc[dst] == 0)
 	{
@@ -2830,13 +2851,21 @@ int MPIDI_Win_wait(MPID_Win *win_ptr)
         win_ptr->epoch_state = MPIDI_EPOCH_NONE;
 
     /* wait for all operations from other processes to finish */
+#ifdef RMA_SYNC_OPA_COUNTER
+    if (OPA_load_int(&(win_ptr->my_counter)))
+#else
     if (win_ptr->my_counter)
+#endif
     {
 	MPID_Progress_state progress_state;
 	
 	MPIR_T_PVAR_TIMER_START(RMA, rma_winwait_wait);
 	MPID_Progress_start(&progress_state);
+#ifdef RMA_SYNC_OPA_COUNTER
+        while (OPA_load_int(&(win_ptr->my_counter)))
+#else
 	while (win_ptr->my_counter)
+#endif
 	{
 	    mpi_errno = MPID_Progress_wait(&progress_state);
 	    /* --BEGIN ERROR HANDLING-- */
@@ -2888,7 +2917,11 @@ int MPIDI_Win_test(MPID_Win *win_ptr, int *flag)
 	MPIU_ERR_POP(mpi_errno);
     }
 
+#ifdef RMA_SYNC_OPA_COUNTER
+    *flag = (OPA_load_int(&(win_ptr->my_counter))) ? 0 : 1;
+#else
     *flag = (win_ptr->my_counter) ? 0 : 1;
+#endif
 
     if (*flag) {
         /* Track access epoch state */
@@ -6118,11 +6151,21 @@ int MPIDI_CH3_Finish_rma_op_target(MPIDI_VC_t *vc, MPID_Win *win_ptr, int is_rma
     if (flags & MPIDI_CH3_PKT_FLAG_RMA_AT_COMPLETE) {
         MPIU_Assert(win_ptr->current_lock_type == MPID_LOCK_NONE);
 
+#ifdef RMA_SYNC_OPA_COUNTER
+        /* Assume that decrement and load do not have to be atomic. */
+        OPA_decr_int(&(win_ptr->my_counter));
+        MPIU_Assert((OPA_load_int(&(win_ptr->my_counter))) >= 0);
+#else
         win_ptr->my_counter -= 1;
         MPIU_Assert(win_ptr->my_counter >= 0);
+#endif
 
         /* Signal the local process when the op counter reaches 0. */
+#ifdef RMA_SYNC_OPA_COUNTER
+        if (OPA_load_int(&(win_ptr->my_counter)) == 0)
+#else
         if (win_ptr->my_counter == 0)
+#endif
             MPIDI_CH3_Progress_signal_completion();
     }
 

@@ -285,7 +285,11 @@ static int win_init(MPI_Aint size, int disp_unit, int create_flavor, int model,
     (*win_ptr)->start_assert        = 0;
     (*win_ptr)->comm_ptr            = win_comm_ptr;
 
+#ifdef RMA_SYNC_OPA_COUNTER
+    OPA_store_int(&((*win_ptr)->my_counter), 0);
+#else
     (*win_ptr)->my_counter          = 0;
+#endif
     /* (*win_ptr)->base_addrs[] is set by caller; */
     /* (*win_ptr)->sizes[] is set by caller; */
     /* (*win_ptr)->disp_units[] is set by caller; */

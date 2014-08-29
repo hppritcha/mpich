@@ -261,8 +261,14 @@ struct MPIDI_Win_target_state {
                                    to Lock */
 };
 
+#ifdef RMA_SYNC_OPA_COUNTER
+    #define WIN_COUNTER_TYPE OPA_int_t
+#else
+    #define WIN_COUNTER_TYPE volatile int
+#endif
+
 #define MPIDI_DEV_WIN_DECL                                               \
-    volatile int my_counter;  /* completion counter for operations       \
+    WIN_COUNTER_TYPE my_counter;  /* completion counter for operations   \
                                  targeting this window */                \
     void **base_addrs;     /* array of base addresses of the windows of  \
                               all processes */                           \
