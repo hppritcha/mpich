@@ -42,7 +42,7 @@ cvars:
 #define FCNAME DECL_FUNC(MPID_nem_ofi_init)
 int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_max_sz_p)
 {
-    int ret, fi_version, i, len, pmi_errno;
+    int ret, fi_version, i, len, pmi_errno, vallen;
     int mpi_errno = MPI_SUCCESS;
     info_t *hints, *prov_tagged, *prov_use;
     cq_attr_t cq_attr;
@@ -222,11 +222,17 @@ int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_
     /* Publish the business card        */
     /* to the KVS                       */
     /* -------------------------------- */
+#ifndef USE_PMI2_API
     PMI_RC(PMI_KVS_Get_my_name(kvsname, OFI_KVSAPPSTRLEN), pmi);
+#endif
     sprintf(key, "OFI-%d", pg_rank);
 
-    PMI_RC(PMI_KVS_Put(kvsname, key, my_bc), pmi);
-    PMI_RC(PMI_KVS_Commit(kvsname), pmi);
+#ifdef USE_PMI2_API
+    PMI_RC(PMI2_KVS_Put(key, my_bc), pmi);
+#else
+    PMI_RC(PMI2_KVS_Put(kvsname, key, my_bc), pmi);
+    PMI_RC(PMI2_KVS_Commit(kvsname), pmi);
+#endif
 
     /* -------------------------------- */
     /* Set the MPI maximum tag value    */
@@ -238,7 +244,11 @@ int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_
     /* their business card               */
     /* --------------------------------- */
     gl_data.rts_cts_in_flight = 0;
+#ifdef USE_PMI2_API
+    PMI2_KVS_Fence();
+#else
     PMI_Barrier();
+#endif
 
     /* --------------------------------- */
     /* Retrieve every rank's address     */
@@ -250,7 +260,12 @@ int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_
     for (i = 0; i < pg_p->size; ++i) {
         sprintf(key, "OFI-%d", i);
 
+#ifdef USE_PMI2_API
+        PMI_RC(PMI2_KVS_Get(pg_p->id, PMI2_ID_NULL, key, bc, OFI_KVSAPPSTRLEN, 
+			    &vallen), pmi);
+#else
         PMI_RC(PMI_KVS_Get(kvsname, key, bc, OFI_KVSAPPSTRLEN), pmi);
+#endif
         ret = MPL_str_get_binary_arg(bc, "OFI",
                                       (char *) &addrs[i * gl_data.bound_addrlen],
                                       gl_data.bound_addrlen, &len);
