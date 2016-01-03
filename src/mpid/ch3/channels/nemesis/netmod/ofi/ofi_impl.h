@@ -12,7 +12,13 @@
 
 #include "mpid_nem_impl.h"
 #include "mpihandlemem.h"
+#ifdef USE_PMI2_API
+#include "pmi2.h"
+#define PMIX_SUCCESS PMI2_SUCCESS
+#else
 #include "pmi.h"
+#define PMIX_SUCCESS PMI_SUCCESS
+#endif
 #include <rdma/fabric.h>
 #include <rdma/fi_errno.h>
 #include <rdma/fi_endpoint.h>
@@ -190,7 +196,7 @@ fn_fail:                      \
   do                                                            \
     {                                                           \
       pmi_errno  = FUNC;                                        \
-      MPIR_ERR_##CHKANDJUMP4(pmi_errno!=PMI_SUCCESS,            \
+      MPIR_ERR_##CHKANDJUMP4(pmi_errno!=PMIX_SUCCESS,            \
                            mpi_errno,                           \
                            MPI_ERR_OTHER,                       \
                            "**ofi_"#STR,                        \
